@@ -209,24 +209,44 @@ function showResults(tracks, name) {
 
   countEl.textContent = doneCount;
 
-  container.onclick = (e) => {
-    if (!e.target.classList.contains("done-btn")) return;
-    const i = e.target.dataset.i;
-    const row = e.target.closest(".track");
-    if (saved[i]) {
-      delete saved[i];
-      row.classList.remove("done");
-      e.target.textContent = "Done";
-      doneCount--;
-    } else {
-      saved[i] = true;
-      row.classList.add("done");
-      e.target.textContent = "Undo";
-      doneCount++;
-    }
+  function markDone(i) {
+    if (saved[i]) return;
+    saved[i] = true;
+    const row = container.querySelector(`[data-i="${i}"]`).closest(".track");
+    row.classList.add("done");
+    row.querySelector(".done-btn").textContent = "Undo";
+    doneCount++;
     countEl.textContent = doneCount;
     localStorage.setItem(key, JSON.stringify(saved));
     updateBatchBtn();
+  }
+
+  function markUndone(i) {
+    if (!saved[i]) return;
+    delete saved[i];
+    const row = container.querySelector(`[data-i="${i}"]`).closest(".track");
+    row.classList.remove("done");
+    row.querySelector(".done-btn").textContent = "Done";
+    doneCount--;
+    countEl.textContent = doneCount;
+    localStorage.setItem(key, JSON.stringify(saved));
+    updateBatchBtn();
+  }
+
+  // Click Search link → auto-mark done
+  container.addEventListener("click", (e) => {
+    const link = e.target.closest("a.btn");
+    if (link) {
+      const i = link.closest(".track").querySelector(".done-btn").dataset.i;
+      markDone(parseInt(i));
+    }
+  });
+
+  // Click Done/Undo button → toggle
+  container.onclick = (e) => {
+    if (!e.target.classList.contains("done-btn")) return;
+    const i = parseInt(e.target.dataset.i);
+    if (saved[i]) markUndone(i); else markDone(i);
   };
 
   function updateBatchBtn() {
@@ -255,6 +275,7 @@ document.getElementById("batch-btn").addEventListener("click", () => {
     const [artist, title] = currentTracks[i];
     const q = encodeURIComponent((artist + " " + title).trim());
     window.open("https://soundcloud.com/search/sounds?q=" + q, "_blank");
+    markDone(i);
   }
 });
 
