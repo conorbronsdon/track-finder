@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SoundCloud Track Finder</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111; color: #eee; min-height: 100vh; }
+
+  /* Input view */
+  #input-view { max-width: 640px; margin: 0 auto; padding: 60px 20px; }
+  #input-view h1 { color: #f50; margin-bottom: 8px; font-size: 28px; }
+  #input-view p { color: #888; margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
+  #input-view textarea { width: 100%; height: 400px; background: #1a1a1a; color: #eee; border: 1px solid #333; border-radius: 8px; padding: 14px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 13px; resize: vertical; }
+  #input-view textarea:focus { outline: none; border-color: #f50; }
+  #input-view textarea::placeholder { color: #555; }
+  .input-row { display: flex; gap: 12px; margin-top: 14px; align-items: center; }
+  #playlist-name { flex: 1; padding: 10px 14px; background: #1a1a1a; color: #eee; border: 1px solid #333; border-radius: 6px; font-size: 14px; }
+  #playlist-name:focus { outline: none; border-color: #f50; }
+  #go-btn { padding: 10px 28px; background: #f50; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  #go-btn:hover { background: #e04500; }
+  .format-hint { color: #555; font-size: 12px; margin-top: 10px; }
+
+  /* Results view */
+  #results-view { display: none; padding: 20px; }
+  .header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .header h1 { color: #f50; font-size: 24px; }
+  #back-btn { padding: 6px 14px; background: #333; color: #aaa; border: 1px solid #444; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  #back-btn:hover { background: #444; color: #eee; }
+  .track { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #222; transition: background 0.15s; }
+  .track:hover { background: #1a1a1a; }
+  .track.done { opacity: 0.35; }
+  .num { width: 32px; color: #666; font-size: 13px; flex-shrink: 0; }
+  .info { flex: 1; }
+  .artist { color: #f50; font-weight: 600; }
+  .title { color: #ddd; }
+  .actions { display: flex; gap: 8px; flex-shrink: 0; }
+  a.btn { display: inline-block; padding: 6px 14px; background: #f50; color: #fff; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: 500; }
+  a.btn:hover { background: #e04500; }
+  button.done-btn { padding: 6px 12px; background: #333; color: #aaa; border: 1px solid #444; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  button.done-btn:hover { background: #444; }
+  .progress { position: sticky; top: 0; background: #111; padding: 12px 0; border-bottom: 1px solid #333; z-index: 10; font-size: 14px; }
+  .progress span { color: #f50; font-weight: 700; }
+
+  /* Saved playlists */
+  #saved-list { margin-top: 30px; }
+  #saved-list h2 { color: #888; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .saved-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #1a1a1a; border-radius: 6px; margin-bottom: 6px; cursor: pointer; }
+  .saved-item:hover { background: #222; }
+  .saved-item .name { color: #eee; font-weight: 500; }
+  .saved-item .count { color: #666; font-size: 13px; }
+  .saved-item .delete-saved { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .saved-item .delete-saved:hover { color: #f55; }
+</style>
+</head>
+<body>
+
+<div id="input-view">
+  <h1>SoundCloud Track Finder</h1>
+  <p>Paste a tracklist below and get SoundCloud search links for every track.</p>
+  <textarea id="tracklist" placeholder="Friction & Circadian- Interstellar
+Kanine- Release Me
+Sub Focus- Original Don
+..."></textarea>
+  <div class="input-row">
+    <input type="text" id="playlist-name" placeholder="Playlist name (optional)">
+    <button id="go-btn">Generate</button>
+  </div>
+  <p class="format-hint">Format: Artist- Track Name (one per line). Also handles "Artist — Title", numbered lists, bullet points.</p>
+  <div id="saved-list"></div>
+</div>
+
+<div id="results-view">
+  <div class="header">
+    <button id="back-btn">&larr; Back</button>
+    <h1 id="results-title">Playlist</h1>
+  </div>
+  <div class="progress">Progress: <span id="count">0</span> / <span id="total">0</span> done</div>
+  <div id="tracks"></div>
+</div>
+
+<script>
+function parseTracklist(text) {
+  const tracks = [];
+  for (let line of text.split("\n")) {
+    line = line.trim();
+    if (!line) continue;
+    // Strip leading numbers, bullets
+    line = line.replace(/^\d+[\.\)]\s*/, "").replace(/^[-*]\s+/, "").trim();
+    if (!line) continue;
+
+    let artist = "", title = line;
+    if (line.includes("- ")) {
+      [artist, ...rest] = line.split("- ");
+      artist = artist.trim();
+      title = rest.join("- ").trim();
+    } else if (line.includes(" — ")) {
+      [artist, ...rest] = line.split(" — ");
+      artist = artist.trim();
+      title = rest.join(" — ").trim();
+    } else if (line.includes(" - ")) {
+      [artist, ...rest] = line.split(" - ");
+      artist = artist.trim();
+      title = rest.join(" - ").trim();
+    }
+    tracks.push([artist, title]);
+  }
+  return tracks;
+}
+
+function storageKey(name) {
+  return "sc-finder-" + name;
+}
+
+function getSavedPlaylists() {
+  const playlists = JSON.parse(localStorage.getItem("sc-finder-index") || "[]");
+  return playlists;
+}
+
+function savePlaylistIndex(name, trackCount) {
+  let playlists = getSavedPlaylists();
+  if (!playlists.find(p => p.name === name)) {
+    playlists.push({ name, count: trackCount });
+    localStorage.setItem("sc-finder-index", JSON.stringify(playlists));
+  }
+}
+
+function removePlaylistIndex(name) {
+  let playlists = getSavedPlaylists().filter(p => p.name !== name);
+  localStorage.setItem("sc-finder-index", JSON.stringify(playlists));
+  localStorage.removeItem(storageKey(name));
+  localStorage.removeItem(storageKey(name) + "-tracks");
+}
+
+function renderSavedPlaylists() {
+  const container = document.getElementById("saved-list");
+  const playlists = getSavedPlaylists();
+  if (!playlists.length) { container.innerHTML = ""; return; }
+
+  let html = "<h2>Saved Playlists</h2>";
+  for (const p of playlists) {
+    html += `<div class="saved-item" data-name="${p.name}">
+      <span class="name">${p.name}</span>
+      <span class="count">${p.count} tracks</span>
+      <button class="delete-saved" data-name="${p.name}" title="Delete">&times;</button>
+    </div>`;
+  }
+  container.innerHTML = html;
+
+  container.querySelectorAll(".saved-item").forEach(el => {
+    el.addEventListener("click", (e) => {
+      if (e.target.classList.contains("delete-saved")) {
+        e.stopPropagation();
+        removePlaylistIndex(e.target.dataset.name);
+        renderSavedPlaylists();
+        return;
+      }
+      const name = el.dataset.name;
+      const tracks = JSON.parse(localStorage.getItem(storageKey(name) + "-tracks") || "[]");
+      if (tracks.length) showResults(tracks, name);
+    });
+  });
+}
+
+function showResults(tracks, name) {
+  document.getElementById("input-view").style.display = "none";
+  document.getElementById("results-view").style.display = "block";
+  document.getElementById("results-title").textContent = name || "Playlist";
+
+  const container = document.getElementById("tracks");
+  const countEl = document.getElementById("count");
+  const totalEl = document.getElementById("total");
+  totalEl.textContent = tracks.length;
+  container.innerHTML = "";
+
+  const key = storageKey(name);
+  const saved = JSON.parse(localStorage.getItem(key) || "{}");
+  let doneCount = 0;
+
+  // Save tracks for reload
+  localStorage.setItem(key + "-tracks", JSON.stringify(tracks));
+  savePlaylistIndex(name, tracks.length);
+
+  tracks.forEach(([artist, title], i) => {
+    const q = encodeURIComponent((artist + " " + title).trim());
+    const url = "https://soundcloud.com/search/sounds?q=" + q;
+    const div = document.createElement("div");
+    div.className = "track" + (saved[i] ? " done" : "");
+    div.innerHTML =
+      '<div class="num">' + (i+1) + '</div>' +
+      '<div class="info">' + (artist ? '<span class="artist">' + artist + '</span> — ' : '') + '<span class="title">' + title + '</span></div>' +
+      '<div class="actions">' +
+        '<a class="btn" href="' + url + '" target="_blank">Search</a>' +
+        '<button class="done-btn" data-i="' + i + '">' + (saved[i] ? "Undo" : "Done") + '</button>' +
+      '</div>';
+    container.appendChild(div);
+    if (saved[i]) doneCount++;
+  });
+
+  countEl.textContent = doneCount;
+
+  container.onclick = (e) => {
+    if (!e.target.classList.contains("done-btn")) return;
+    const i = e.target.dataset.i;
+    const row = e.target.closest(".track");
+    if (saved[i]) {
+      delete saved[i];
+      row.classList.remove("done");
+      e.target.textContent = "Done";
+      doneCount--;
+    } else {
+      saved[i] = true;
+      row.classList.add("done");
+      e.target.textContent = "Undo";
+      doneCount++;
+    }
+    countEl.textContent = doneCount;
+    localStorage.setItem(key, JSON.stringify(saved));
+  };
+}
+
+// Generate button
+document.getElementById("go-btn").addEventListener("click", () => {
+  const text = document.getElementById("tracklist").value;
+  const name = document.getElementById("playlist-name").value.trim() || "Playlist";
+  const tracks = parseTracklist(text);
+  if (!tracks.length) { alert("No tracks found. Check format."); return; }
+  showResults(tracks, name);
+});
+
+// Back button
+document.getElementById("back-btn").addEventListener("click", () => {
+  document.getElementById("results-view").style.display = "none";
+  document.getElementById("input-view").style.display = "block";
+  renderSavedPlaylists();
+});
+
+// Ctrl+Enter to generate
+document.getElementById("tracklist").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    document.getElementById("go-btn").click();
+  }
+});
+
+// Init
+renderSavedPlaylists();
+</script>
+</body>
+</html>

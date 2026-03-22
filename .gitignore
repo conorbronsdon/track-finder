@@ -1,0 +1,5 @@
+playlist_results.json
+*.html
+!index.html
+__pycache__/
+.soundcloud-playwright-profile/
