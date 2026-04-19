@@ -7,7 +7,7 @@ Paste a tracklist, get a search link for every track on your platform of choice 
 [![GitHub stars](https://img.shields.io/github/stars/conorbronsdon/soundcloud-track-finder?style=social)](https://github.com/conorbronsdon/soundcloud-track-finder/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![X](https://img.shields.io/badge/X-@ConorBronsdon-black?style=flat-square&logo=x)](https://x.com/ConorBronsdon)
-[![Web App](https://img.shields.io/badge/Try_the_web_app-ff5500?style=flat-square&logo=vercel&logoColor=white)](https://soundcloud-track-finder.vercel.app)
+[![Web App](https://img.shields.io/badge/Try_the_web_app-ff5500?style=flat-square&logo=vercel&logoColor=white)](https://track-finder.vercel.app)
 
 </div>
 
@@ -17,11 +17,11 @@ As an avid SoundCloud user (I have too many playlists), I've always wished it wa
 
 If you're constantly crate digging, or found a set on YouTube with a tracklist you love, this helps you find the individual tracks much more easily. Paste the list, pick your platform, click through the search links, mark tracks as you add them. Progress saves to your browser so you can come back to it.
 
-**Live site:** https://soundcloud-track-finder.vercel.app
+**Live site:** https://track-finder.vercel.app
 
 ## Usage
 
-1. Visit [soundcloud-track-finder.vercel.app](https://soundcloud-track-finder.vercel.app) (or open `index.html` locally)
+1. Visit [track-finder.vercel.app](https://track-finder.vercel.app) (or open `index.html` locally)
 2. Paste a tracklist — one track per line
 3. Click **Generate**
 4. Click **Search** next to each track to find it on SoundCloud (auto-marks it done)
