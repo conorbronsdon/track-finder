@@ -30,6 +30,15 @@
   .format-hint { color: #555; font-size: 12px; margin-top: 10px; line-height: 1.6; }
   .format-hint code { background: #1a1a1a; color: #888; padding: 1px 5px; border-radius: 3px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; }
 
+  /* Platform selector */
+  .platform-select { margin-top: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .platform-select .label { color: #888; font-size: 13px; }
+  .platform-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { padding: 6px 12px; background: #1a1a1a; color: #999; border: 1px solid #333; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background 0.12s, color 0.12s, border-color 0.12s; }
+  .chip:hover { background: #222; color: #ccc; border-color: #444; }
+  .chip.active { background: #f50; color: #fff; border-color: #f50; }
+  .chip.active:hover { background: #e04500; border-color: #e04500; }
+
   /* Results view */
   #results-view { display: none; padding: 20px; }
   .header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
@@ -99,6 +108,16 @@ Sub Focus- Original Don
     <button id="go-btn">Generate</button>
   </div>
   <p class="format-hint">One track per line. Handles most common formats — <code>Artist - Title</code>, <code>Artist — Title</code>, <code>Artist: Title</code>, tabs, numbered or bulleted lists. Lines without a separator still search as a single phrase.</p>
+
+  <div class="platform-select">
+    <span class="label">Search on:</span>
+    <div class="platform-chips">
+      <button type="button" class="chip" data-platform="soundcloud">SoundCloud</button>
+      <button type="button" class="chip" data-platform="spotify">Spotify</button>
+      <button type="button" class="chip" data-platform="youtube">YouTube</button>
+      <button type="button" class="chip" data-platform="apple">Apple Music</button>
+    </div>
+  </div>
   <div id="saved-list"></div>
 
   <div class="footer">
@@ -154,6 +173,30 @@ function parseTracklist(text) {
 
 function storageKey(name) {
   return "sc-finder-" + name;
+}
+
+const PLATFORMS = {
+  soundcloud: { name: "SoundCloud", search: q => "https://soundcloud.com/search/sounds?q=" + q },
+  spotify:    { name: "Spotify",    search: q => "https://open.spotify.com/search/" + q },
+  youtube:    { name: "YouTube",    search: q => "https://www.youtube.com/results?search_query=" + q },
+  apple:      { name: "Apple Music", search: q => "https://music.apple.com/us/search?term=" + q },
+};
+
+let currentPlatform = localStorage.getItem("sc-finder-platform") || "soundcloud";
+if (!PLATFORMS[currentPlatform]) currentPlatform = "soundcloud";
+
+function setPlatform(p) {
+  if (!PLATFORMS[p]) return;
+  currentPlatform = p;
+  localStorage.setItem("sc-finder-platform", p);
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.classList.toggle("active", chip.dataset.platform === p);
+  });
+}
+
+function searchUrl(artist, title) {
+  const q = encodeURIComponent((artist + " " + title).trim());
+  return PLATFORMS[currentPlatform].search(q);
 }
 
 function getSavedPlaylists() {
@@ -251,8 +294,7 @@ function showResults(tracks, name) {
   savePlaylistIndex(name, tracks.length);
 
   tracks.forEach(([artist, title], i) => {
-    const q = encodeURIComponent((artist + " " + title).trim());
-    const url = "https://soundcloud.com/search/sounds?q=" + q;
+    const url = searchUrl(artist, title);
 
     const row = document.createElement("div");
     row.className = "track" + (saved[i] ? " done" : "");
@@ -360,12 +402,26 @@ document.getElementById("batch-btn").addEventListener("click", () => {
     if (undone.length >= 10) break;
   }
   if (!undone.length) { alert("All tracks are done!"); return; }
+
   for (const i of undone) {
     const [artist, title] = currentTracks[i];
-    const q = encodeURIComponent((artist + " " + title).trim());
-    window.open("https://soundcloud.com/search/sounds?q=" + q, "_blank");
-    markDone(i);
+    window.open(searchUrl(artist, title), "_blank");
+    if (!currentSaved[i]) {
+      currentSaved[i] = true;
+      const doneBtn = document.querySelector(`.done-btn[data-i="${i}"]`);
+      if (doneBtn) {
+        doneBtn.closest(".track").classList.add("done");
+        doneBtn.textContent = "Undo";
+      }
+    }
   }
+  localStorage.setItem(currentKey, JSON.stringify(currentSaved));
+  const doneCount = Object.keys(currentSaved).length;
+  document.getElementById("count").textContent = doneCount;
+  const remaining = currentTracks.length - doneCount;
+  const batchBtn = document.getElementById("batch-btn");
+  if (remaining <= 0) { batchBtn.textContent = "All done!"; batchBtn.disabled = true; }
+  else { batchBtn.textContent = "Open next " + Math.min(remaining, 10); batchBtn.disabled = false; }
 });
 
 // Generate button
@@ -391,8 +447,17 @@ document.getElementById("tracklist").addEventListener("keydown", (e) => {
   }
 });
 
+// Platform selector
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => setPlatform(chip.dataset.platform));
+});
+
 // Init
+setPlatform(currentPlatform);
 renderSavedPlaylists();
 </script>
+
+<!-- Vercel Web Analytics. Does nothing until enabled in the project's Vercel dashboard. -->
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
