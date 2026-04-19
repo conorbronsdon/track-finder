@@ -79,7 +79,7 @@ Built by [Conor Bronsdon](https://github.com/conorbronsdon) · [X](https://x.com
 
 ## Disclaimer
 
-*All views, opinions, and statements expressed on this project are solely my own and are made in my personal capacity. They do not reflect, and should not be construed as reflecting, the views, positions, or policies of my employer. This project is not affiliated with, authorized by, or endorsed by my employer in any way.*
+*All views, opinions, and statements expressed on this project are solely my own and are made in my personal capacity. They do not reflect, and should not be construed as reflecting, the views, positions, or policies of Modular. This project is not affiliated with, authorized by, or endorsed by Modular in any way.*
 
 ## License
 
