@@ -152,7 +152,8 @@ https://www.youtube.com/playlist?list=PL..."></textarea>
       <p><b>From 1001tracklists:</b> use the <b>Export Tracklist</b> button for cleanest results. Raw select-all also works — the parser strips:</p>
       <ul>
         <li>UI noise: <code>Save</code> / <code>Pre-Save</code> buttons, play counts, track numbers, <code>artwork placeholder</code>, <code>[ID]</code> placeholders, repeated uploader usernames</li>
-        <li>Metadata: leading timestamps, <code>w/</code> overlay markers, trailing <code>[Label]</code> tags, trailing <code>Artwork</code> alt-text</li>
+        <li>Metadata: leading timestamps, bare <code>05:10</code>-style timecodes on their own line, <code>w/</code> overlay markers, trailing <code>[Label]</code> tags, trailing <code>Artwork</code> alt-text</li>
+        <li>Section headers: lines ending in <code>:</code> with nothing after (<code>Hot Right Now:</code>, <code>Killer Cut:</code>, <code>played:</code>, <code>Club Toolroom:</code>)</li>
       </ul>
     </div>
   </details>
@@ -194,6 +195,11 @@ function parseTracklist(text) {
   //   [ID] only lines (unknown tracks — nothing to search for)
   //   trailing [Label] / [Free DL] style tags (keep remix info in parens)
   const TIMESTAMP_RE = /^\[?\d{1,2}:\d{2}(?::\d{2})?\]?\s+/;
+  // Whole-line timestamp: "05:10", "1:23:45", "[12:41]". No text after.
+  const TIMESTAMP_ONLY_RE = /^\[?\d{1,2}:\d{2}(?::\d{2})?\]?$/;
+  // Section-header style lines — "Hot Right Now:", "Killer Cut:", "played:",
+  // "Club Toolroom:". Anything short that ends in a colon with no content after.
+  const HEADER_LINE_RE = /^[^:]{1,40}:$/;
   const OVERLAY_PREFIX_RE = /^w\/\s+/i;
   const ID_ONLY_RE = /^\[?\s*id\s*\]?$/i;
   const TRAILING_TAG_RE = /\s*\[[^\]]+\]\s*$/;
@@ -217,13 +223,15 @@ function parseTracklist(text) {
 
   for (let line of rawLines) {
     if (CRUFT_LINE_RE.test(line)) continue;
+    if (TIMESTAMP_ONLY_RE.test(line)) continue;
+    if (HEADER_LINE_RE.test(line)) continue;
     if (TRAILING_ARTWORK_RE.test(line)) continue;
     // Separator-less lines appearing 3+ times are page chrome, not tracks
     if (!SEP_RE.test(line) && (repeatCounts.get(line.toLowerCase()) || 0) >= 3) continue;
     line = line.replace(LIST_MARKER_RE, "").trim();
     line = line.replace(TIMESTAMP_RE, "").trim();
     line = line.replace(OVERLAY_PREFIX_RE, "").trim();
-    if (!line || ID_ONLY_RE.test(line)) continue;
+    if (!line || ID_ONLY_RE.test(line) || TIMESTAMP_ONLY_RE.test(line) || HEADER_LINE_RE.test(line)) continue;
     line = line.replace(TRAILING_TAG_RE, "").trim();
     if (!line || CRUFT_LINE_RE.test(line)) continue;
 
