@@ -1,6 +1,6 @@
 # Ideas & Roadmap
 
-Running list of feature ideas, deferred work, and things considered and skipped. Open an [issue](https://github.com/conorbronsdon/soundcloud-track-finder/issues) with your own.
+Running list of feature ideas, deferred work, and things considered and skipped. Open an [issue](https://github.com/conorbronsdon/track-finder/issues) with your own.
 
 ## On deck
 
@@ -26,8 +26,8 @@ Many DJ sets include a tracklist in the description. Could be:
 
 ## Considered
 
-### Naming — repo + URL still say "soundcloud-track-finder"
-The visible name is now "Track Finder" (H1, page title, meta tags, README) after the platform selector shipped. The GitHub repo slug and the Vercel URL still say `soundcloud-track-finder` — renaming those costs existing stars, inbound links from the launch post, and bookmarks, so deferring until analytics show it matters. If SoundCloud keeps being the dominant platform people click, the URL staying as-is is fine.
+### Naming — renamed to Track Finder across the board
+Renamed 2026-04-19 after the platform selector shipped: H1, page title, meta tags, README, GitHub repo (`conorbronsdon/track-finder`), and Vercel primary domain (`track-finder.vercel.app`). Old slugs 301 to the new ones, so existing stars, inbound links from the launch post, and bookmarks all keep working.
 
 ## Not planned
 

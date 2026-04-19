@@ -4,7 +4,7 @@
 
 Paste a tracklist, get a search link for every track on your platform of choice — SoundCloud, Spotify, YouTube, or Apple Music. No backend, no account, no dependencies — one HTML file.
 
-[![GitHub stars](https://img.shields.io/github/stars/conorbronsdon/soundcloud-track-finder?style=social)](https://github.com/conorbronsdon/soundcloud-track-finder/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/conorbronsdon/track-finder?style=social)](https://github.com/conorbronsdon/track-finder/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![X](https://img.shields.io/badge/X-@ConorBronsdon-black?style=flat-square&logo=x)](https://x.com/ConorBronsdon)
 [![Web App](https://img.shields.io/badge/Try_the_web_app-ff5500?style=flat-square&logo=vercel&logoColor=white)](https://track-finder.vercel.app)
@@ -71,7 +71,7 @@ No build step or `vercel.json` required — Vercel serves `index.html` from the 
 
 ## Contributing
 
-Open an [issue](https://github.com/conorbronsdon/soundcloud-track-finder/issues) with a format the parser doesn't handle, a bug, or a feature idea. PRs welcome.
+Open an [issue](https://github.com/conorbronsdon/track-finder/issues) with a format the parser doesn't handle, a bug, or a feature idea. PRs welcome.
 
 ---
 
