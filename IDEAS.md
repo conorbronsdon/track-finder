@@ -1,46 +1,33 @@
 # Ideas & Roadmap
 
-Running list of feature ideas, deferred work, and things considered and skipped. Open an [issue](https://github.com/conorbronsdon/track-finder/issues) with your own.
+Running list of feature ideas, deferred work, and things considered and skipped. Open-ended items are tracked as GitHub issues; this file holds the narrative and the "why not" items.
 
-## On deck
+Open an [issue](https://github.com/conorbronsdon/track-finder/issues) with your own.
 
-### More platforms
-Easy additions — same URL-template pattern as the existing five.
-- **Tidal** — `https://tidal.com/search?q=<query>`
-- **Bandcamp** — `https://bandcamp.com/search?q=<query>`
-- **Mixcloud** — `https://www.mixcloud.com/search/?q=<query>`
-- **Deezer** — `https://www.deezer.com/search/<query>`
+## Tracked in issues
 
-### Import from a 1001tracklists URL
-Harder than initially scoped: 1001tracklists is now fully client-side rendered — a server-side fetch returns "Please enable JavaScript for full functionality" with no track data in the HTML. Existing open-source scrapers (elte0/1001-tracklists-api) were written for an older server-rendered version and no longer work. Paths forward:
-1. **Headless browser** on a Vercel serverless function (Puppeteer or Playwright). Real memory/cold-start cost, may need to leave hobby tier, fragile against redesigns.
-2. **Reverse-engineer the client-side JSON endpoint** the page calls to populate the tracklist. Lightest if it exists and is stable.
-3. **Bookmarklet / browser extension** — runs in the user's already-authenticated tab, scrapes the DOM locally, opens Track Finder with tracks pre-filled. Sidesteps the server-side anti-bot problem entirely. Different distribution model.
+| # | Idea | Status |
+|---|------|--------|
+| [#1](https://github.com/conorbronsdon/track-finder/issues/1) | Import tracklist from YouTube playlist URL | Planned |
+| [#2](https://github.com/conorbronsdon/track-finder/issues/2) | Import tracklist from 1001tracklists URL | Investigating |
+| [#3](https://github.com/conorbronsdon/track-finder/issues/3) | Import tracklist from MixesDB URL | Deferred to after #2 |
+| [#4](https://github.com/conorbronsdon/track-finder/issues/4) | Create actual playlists on destination platforms (playlistify-style) | Parked — needs OAuth + backend |
+| [#5](https://github.com/conorbronsdon/track-finder/issues/5) | Additional search platforms (Tidal, Bandcamp, Mixcloud, Deezer) | Wait for user demand |
 
-Interim: copy-paste flow. User selects the tracklist on the 1001TL page, pastes into the textarea. Parser needs 1001TL-aware cleanup (strip timestamps, `w/` overlay markers, `[ID]` entries, `[Label]` tags).
+## Context on the bigger ones
 
-### Import from MixesDB URL
-MixesDB has a larger catalog of older sets than 1001TL and is more static HTML. Same evaluation needed — likely easier than 1001TL. Defer until 1001TL approach is settled; reuse the same serverless-fetch pattern.
+### 1001tracklists import (#2) — why it's harder than it looks
+1001tracklists is now fully client-side rendered. A plain server fetch returns a page shell with "Please enable JavaScript for full functionality" and no track data. Existing open-source scrapers (e.g., [elte0/1001-tracklists-api](https://github.com/elte0/1001-tracklists-api)) target the older server-rendered layout and no longer work. Three real paths: headless browser (heavy), reverse-engineered JSON endpoint (lightest if it exists), bookmarklet/extension (most durable, different distribution model). Issue #2 has the full breakdown.
 
-### Import from a YouTube playlist URL
-YouTube Data API v3 `playlistItems.list` returns video titles — clean path. Needs an API key, so requires a Vercel serverless function (don't ship the key to the client). Heavy lift is title cleanup: strip `[FREE DL]`, `[Official Video]`, `(Prod. by...)`, `【MV】`, leading channel prefixes, trailing label tags. Recommended next URL-paste feature after 1001TL copy-paste lands.
+**Interim:** copy-paste flow. Parser handles 1001TL-specific artifacts (timestamps, `w/` overlays, `[ID]` lines, `[Label]` tags). See `parseTracklist` in `index.html`.
 
-### Create actual playlists (playlistify.app-style)
-Bigger scope: instead of returning search links, push the tracks directly into a SoundCloud/Spotify/Apple Music/YouTube playlist on the user's account. Needs OAuth flows per platform, user auth tokens, session management, and a real backend — this is a different product (probably a different repo) rather than an extension of Track Finder. Reference: [playlistify.app](https://playlistify.app). Park for now, revisit after the search-link product has real usage.
+### Playlist creation (#4) — why it's a different product
+Current app returns search links; user clicks through to add tracks manually. Writing playlists directly requires OAuth per platform, token management, user session state, encrypted token storage, and track-matching logic. That's a backend product, not an extension of Track Finder. Likely wants its own repo.
 
-### Import a YouTube playlist as a tracklist
-Paste a YouTube playlist URL, fetch video titles, clean them up, feed into the existing parser.
-
-- Fetch via YouTube Data API (`playlistItems.list`) — needs API key, ideally behind a small Vercel serverless function so the key isn't in the client
-- Title cleanup is the hard part, not the fetch: strip `[FREE DL]`, `[Official Video]`, `(Prod. by...)`, `【...】` markers, leading channel prefixes, trailing release-label tags
-- Stretch: also support Spotify playlists via Web API
+## Parked without an issue
 
 ### Import from a SoundCloud set description
-Many DJ sets include a tracklist in the description. Could be:
-- A pasted-description flow (the existing parser already handles most of these formats)
-- Automated via the SoundCloud API if I can get app approval (hard since 2021)
-
-## Considered
+Many DJ sets include a tracklist in the description. The existing parser already handles most of what you'd paste — not worth automating until it becomes a real pattern.
 
 ### Naming — renamed to Track Finder across the board
 Renamed 2026-04-19 after the platform selector shipped: H1, page title, meta tags, README, GitHub repo (`conorbronsdon/track-finder`), and Vercel primary domain (`track-finder.vercel.app`). Old slugs 301 to the new ones, so existing stars, inbound links from the launch post, and bookmarks all keep working.
@@ -48,4 +35,4 @@ Renamed 2026-04-19 after the platform selector shipped: H1, page title, meta tag
 ## Not planned
 
 ### Shazam-style ID of flips that only live on SoundCloud/YouTube
-Suggested April 2026. Audio fingerprinting against an index of non-commercial releases is a fundamentally different app — indexing, ingestion, DMCA surface area, and probably a real backend. Not an extension of this tool.
+Suggested April 2026. Audio fingerprinting against an index of non-commercial releases is a fundamentally different app — indexing, ingestion, DMCA surface area, a real backend. Not an extension of this tool.
