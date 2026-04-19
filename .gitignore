@@ -3,3 +3,4 @@ playlist_results.json
 !index.html
 __pycache__/
 .soundcloud-playwright-profile/
+.vercel

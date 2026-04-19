@@ -2,9 +2,11 @@
 
 A simple browser-based tool for turning tracklists into SoundCloud search links. Paste a tracklist, get clickable search links for every track.
 
+**Live site:** https://soundcloud-track-finder.vercel.app
+
 ## Usage
 
-1. Open `index.html` in your browser
+1. Visit https://soundcloud-track-finder.vercel.app (or open `index.html` locally)
 2. Paste a tracklist (one track per line)
 3. Click **Generate**
 4. Click **Search** next to each track to find it on SoundCloud
@@ -27,6 +29,19 @@ Also handles `Artist — Title`, numbered lists (`1. Artist- Title`), and bullet
 - Progress tracking with localStorage persistence
 - Saved playlists you can return to
 - Ctrl+Enter shortcut to generate
+
+## Deployment
+
+Hosted on Vercel as a static site. The project is linked to this repo, so pushes to the default branch auto-deploy.
+
+To deploy your own fork:
+
+```bash
+npx vercel        # preview deployment
+npx vercel --prod # production
+```
+
+No build step or `vercel.json` required — Vercel serves `index.html` from the repo root.
 
 ---
 
