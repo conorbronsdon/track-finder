@@ -27,7 +27,8 @@
   #playlist-name:focus { outline: none; border-color: #f50; }
   #go-btn { padding: 10px 28px; background: #f50; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
   #go-btn:hover { background: #e04500; }
-  .format-hint { color: #555; font-size: 12px; margin-top: 10px; }
+  .format-hint { color: #555; font-size: 12px; margin-top: 10px; line-height: 1.6; }
+  .format-hint code { background: #1a1a1a; color: #888; padding: 1px 5px; border-radius: 3px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; }
 
   /* Results view */
   #results-view { display: none; padding: 20px; }
@@ -97,7 +98,7 @@ Sub Focus- Original Don
     <input type="text" id="playlist-name" placeholder="Playlist name (optional)">
     <button id="go-btn">Generate</button>
   </div>
-  <p class="format-hint">Format: Artist- Track Name (one per line). Also handles "Artist — Title", numbered lists, bullet points.</p>
+  <p class="format-hint">One track per line. Handles most common formats — <code>Artist - Title</code>, <code>Artist — Title</code>, <code>Artist: Title</code>, tabs, numbered or bulleted lists. Lines without a separator still search as a single phrase.</p>
   <div id="saved-list"></div>
 
   <div class="footer">
@@ -121,27 +122,31 @@ Sub Focus- Original Don
 <script>
 function parseTracklist(text) {
   const tracks = [];
-  for (let line of text.split("\n")) {
+  // Separators, leftmost match wins:
+  //   tab (spreadsheet paste)
+  //   em/en/figure dash — zero or more adjacent spaces ok
+  //   hyphen — requires a space on at least one side (so "D-Nox" survives)
+  //   colon or pipe — requires space after
+  const SEP_RE = /\t|\s*[—–―]\s*|\s+-\s+|\s+-(?=\S)|(?<=\S)-\s+|:\s+|\s+\|\s+/;
+  const LIST_MARKER_RE = /^[\s>]*(?:\d+[.):\]]|[-*•·▸→])\s+/;
+  const QUOTE_RE = /^["'`\u2018\u2019\u201C\u201D]+|["'`\u2018\u2019\u201C\u201D]+$/g;
+
+  for (let line of text.split(/\r?\n/)) {
     line = line.trim();
     if (!line) continue;
-    // Strip leading numbers, bullets
-    line = line.replace(/^\d+[\.\)]\s*/, "").replace(/^[-*]\s+/, "").trim();
+    line = line.replace(LIST_MARKER_RE, "").trim();
     if (!line) continue;
 
     let artist = "", title = line;
-    if (line.includes("- ")) {
-      [artist, ...rest] = line.split("- ");
-      artist = artist.trim();
-      title = rest.join("- ").trim();
-    } else if (line.includes(" — ")) {
-      [artist, ...rest] = line.split(" — ");
-      artist = artist.trim();
-      title = rest.join(" — ").trim();
-    } else if (line.includes(" - ")) {
-      [artist, ...rest] = line.split(" - ");
-      artist = artist.trim();
-      title = rest.join(" - ").trim();
+    const m = line.match(SEP_RE);
+    if (m) {
+      artist = line.slice(0, m.index).trim();
+      title = line.slice(m.index + m[0].length).trim();
     }
+    artist = artist.replace(QUOTE_RE, "").trim();
+    title = title.replace(QUOTE_RE, "").trim();
+
+    if (!title && !artist) continue;
     tracks.push([artist, title]);
   }
   return tracks;
