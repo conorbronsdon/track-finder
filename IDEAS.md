@@ -12,7 +12,21 @@ Easy additions — same URL-template pattern as the existing five.
 - **Deezer** — `https://www.deezer.com/search/<query>`
 
 ### Import from a 1001tracklists URL
-In progress. Paste a 1001tracklists set URL → fetch + parse on a Vercel serverless function → pipe into the tracklist textarea. Cloudflare posture is the open question; existing open-source scrapers (elte0/1001-tracklists-api) don't handle CF challenges. Likely path: lightweight Cheerio/node-fetch function with realistic headers, fail gracefully + tell the user to copy-paste if blocked.
+Harder than initially scoped: 1001tracklists is now fully client-side rendered — a server-side fetch returns "Please enable JavaScript for full functionality" with no track data in the HTML. Existing open-source scrapers (elte0/1001-tracklists-api) were written for an older server-rendered version and no longer work. Paths forward:
+1. **Headless browser** on a Vercel serverless function (Puppeteer or Playwright). Real memory/cold-start cost, may need to leave hobby tier, fragile against redesigns.
+2. **Reverse-engineer the client-side JSON endpoint** the page calls to populate the tracklist. Lightest if it exists and is stable.
+3. **Bookmarklet / browser extension** — runs in the user's already-authenticated tab, scrapes the DOM locally, opens Track Finder with tracks pre-filled. Sidesteps the server-side anti-bot problem entirely. Different distribution model.
+
+Interim: copy-paste flow. User selects the tracklist on the 1001TL page, pastes into the textarea. Parser needs 1001TL-aware cleanup (strip timestamps, `w/` overlay markers, `[ID]` entries, `[Label]` tags).
+
+### Import from MixesDB URL
+MixesDB has a larger catalog of older sets than 1001TL and is more static HTML. Same evaluation needed — likely easier than 1001TL. Defer until 1001TL approach is settled; reuse the same serverless-fetch pattern.
+
+### Import from a YouTube playlist URL
+YouTube Data API v3 `playlistItems.list` returns video titles — clean path. Needs an API key, so requires a Vercel serverless function (don't ship the key to the client). Heavy lift is title cleanup: strip `[FREE DL]`, `[Official Video]`, `(Prod. by...)`, `【MV】`, leading channel prefixes, trailing label tags. Recommended next URL-paste feature after 1001TL copy-paste lands.
+
+### Create actual playlists (playlistify.app-style)
+Bigger scope: instead of returning search links, push the tracks directly into a SoundCloud/Spotify/Apple Music/YouTube playlist on the user's account. Needs OAuth flows per platform, user auth tokens, session management, and a real backend — this is a different product (probably a different repo) rather than an extension of Track Finder. Reference: [playlistify.app](https://playlistify.app). Park for now, revisit after the search-link product has real usage.
 
 ### Import a YouTube playlist as a tracklist
 Paste a YouTube playlist URL, fetch video titles, clean them up, feed into the existing parser.

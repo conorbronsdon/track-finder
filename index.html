@@ -122,7 +122,7 @@ Sub Focus- Original Don
     <input type="text" id="playlist-name" placeholder="Playlist name (optional)">
     <button id="go-btn">Generate</button>
   </div>
-  <p class="format-hint">One track per line. Handles most common formats — <code>Artist - Title</code>, <code>Artist — Title</code>, <code>Artist: Title</code>, tabs, numbered or bulleted lists. Lines without a separator still search as a single phrase.</p>
+  <p class="format-hint">One track per line. Handles most common formats — <code>Artist - Title</code>, <code>Artist — Title</code>, <code>Artist: Title</code>, tabs, numbered or bulleted lists. Also tolerates 1001tracklists-style copy-paste: leading timestamps, <code>w/</code> overlay markers, <code>[ID]</code> lines (skipped), and trailing <code>[Label]</code> tags are cleaned up. Lines without a separator still search as a single phrase.</p>
   <div id="saved-list"></div>
 
   <div class="footer">
@@ -155,11 +155,24 @@ function parseTracklist(text) {
   const SEP_RE = /\t|\s*[—–―]\s*|\s+-\s+|\s+-(?=\S)|(?<=\S)-\s+|:\s+|\s+\|\s+/;
   const LIST_MARKER_RE = /^[\s>]*(?:\d+[.):\]]|[-*•·▸→])\s+/;
   const QUOTE_RE = /^["'`\u2018\u2019\u201C\u201D]+|["'`\u2018\u2019\u201C\u201D]+$/g;
+  // 1001tracklists-style copy-paste cleanup:
+  //   leading timestamps like [8:23], [00:12:34], 1:23:45
+  //   w/ prefix (overlay / mashup marker)
+  //   [ID] only lines (unknown tracks — nothing to search for)
+  //   trailing [Label] / [Free DL] style tags (keep remix info in parens)
+  const TIMESTAMP_RE = /^\[?\d{1,2}:\d{2}(?::\d{2})?\]?\s+/;
+  const OVERLAY_PREFIX_RE = /^w\/\s+/i;
+  const ID_ONLY_RE = /^\[?\s*id\s*\]?$/i;
+  const TRAILING_TAG_RE = /\s*\[[^\]]+\]\s*$/;
 
   for (let line of text.split(/\r?\n/)) {
     line = line.trim();
     if (!line) continue;
     line = line.replace(LIST_MARKER_RE, "").trim();
+    line = line.replace(TIMESTAMP_RE, "").trim();
+    line = line.replace(OVERLAY_PREFIX_RE, "").trim();
+    if (!line || ID_ONLY_RE.test(line)) continue;
+    line = line.replace(TRAILING_TAG_RE, "").trim();
     if (!line) continue;
 
     let artist = "", title = line;
