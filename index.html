@@ -116,9 +116,11 @@
   .footer-credit a:hover { color: var(--accent); }
   .disclaimer { font-style: italic; color: #555; }
 
-  /* GitHub star button — top right */
+  /* GitHub star button — top right, hidden on the results view so it
+     doesn't collide with the "Open next 10" batch button. */
   .github-corner { position: fixed; top: 16px; right: 16px; z-index: 100; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #1a1a1a; color: #ddd; border: 1px solid #333; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.15s, border-color 0.15s, color 0.15s; }
   .github-corner:hover { background: #222; border-color: var(--accent); color: var(--accent); }
+  body.view-results .github-corner { display: none; }
   .github-corner svg { width: 18px; height: 18px; fill: currentColor; }
   @media (max-width: 520px) {
     .github-corner { padding: 6px 10px; font-size: 12px; }
@@ -411,6 +413,7 @@ let currentKey = "";
 function showResults(tracks, name) {
   document.getElementById("input-view").style.display = "none";
   document.getElementById("results-view").style.display = "block";
+  document.body.classList.add("view-results");
   document.getElementById("results-title").textContent = name || "Playlist";
   currentTracks = tracks;
 
@@ -639,6 +642,7 @@ document.getElementById("go-btn").addEventListener("click", () => {
 document.getElementById("back-btn").addEventListener("click", () => {
   document.getElementById("results-view").style.display = "none";
   document.getElementById("input-view").style.display = "block";
+  document.body.classList.remove("view-results");
   renderSavedPlaylists();
 });
 
