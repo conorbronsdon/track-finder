@@ -75,6 +75,12 @@ npx vercel --prod # production
 
 No build step required.
 
+## Bookmarklet
+
+For scraping tracklists off any page — 1001tracklists, MixesDB, SoundCloud descriptions, Reddit threads — install the bookmarklet from [track-finder.vercel.app/bookmarklet.html](https://track-finder.vercel.app/bookmarklet.html). Drag the button to your bookmarks bar. On any page: highlight the tracklist, click the bookmark, land on Track Finder with the tracks already parsed.
+
+This sidesteps the server-side scraping problem on sites with Cloudflare Turnstile (1001tracklists) — the bookmarklet runs in your already-verified browser tab, so it sees the DOM the site actually rendered.
+
 ## Pre-fill via URL params
 
 For bookmarklets, shareable links, browser extensions, or third-party integrations, Track Finder accepts these query params on load:

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track Finder · Bookmarklet</title>
+<meta name="description" content="Install the Track Finder bookmarklet. Highlight a tracklist on any page, click the bookmarklet, and land on search links for every track.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B5%3C/text%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111; color: #eee; min-height: 100vh; line-height: 1.6; }
+  main { max-width: 680px; margin: 0 auto; padding: 60px 24px 80px; }
+  h1 { color: #f50; font-size: 28px; margin-bottom: 8px; }
+  h2 { color: #eee; font-size: 18px; margin: 32px 0 10px; font-weight: 600; }
+  p { color: #bbb; font-size: 15px; margin-bottom: 12px; }
+  ol, ul { color: #bbb; margin: 10px 0 16px 22px; }
+  ol li, ul li { margin: 4px 0; }
+  .lede { color: #888; font-size: 14px; margin-bottom: 26px; }
+  code { background: #1a1a1a; color: #aaa; padding: 2px 6px; border-radius: 3px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 13px; }
+  .install-box { background: #1a1a1a; border: 1px dashed #444; border-radius: 10px; padding: 24px; margin: 24px 0; text-align: center; }
+  a.bm { display: inline-block; padding: 10px 22px; background: #f50; color: #fff; border-radius: 6px; font-weight: 600; font-size: 15px; text-decoration: none; cursor: grab; }
+  a.bm:hover { background: #e04500; }
+  a.bm:active { cursor: grabbing; }
+  .install-hint { color: #777; font-size: 13px; margin-top: 12px; }
+  .back { color: #aaa; font-size: 13px; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+  .back:hover { color: #f50; }
+  .note { background: #1a1a1a; border-left: 3px solid #f50; padding: 10px 14px; margin: 14px 0; color: #aaa; font-size: 14px; }
+  details { margin-top: 28px; }
+  summary { cursor: pointer; color: #888; font-size: 13px; user-select: none; padding: 4px 0; }
+  summary:hover { color: #ccc; }
+  pre { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 14px; overflow-x: auto; margin-top: 10px; color: #aaa; font-size: 12px; }
+  footer { color: #555; font-size: 12px; margin-top: 48px; padding-top: 20px; border-top: 1px solid #222; text-align: center; }
+  footer a { color: #888; text-decoration: none; }
+  footer a:hover { color: #f50; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="/">&larr; Back to Track Finder</a>
+  <h1>Track Finder Bookmarklet</h1>
+  <p class="lede">Highlight a tracklist on any page, click the bookmarklet, land on search links for every track. Works on 1001tracklists, MixesDB, YouTube descriptions, Reddit threads, anywhere really.</p>
+
+  <h2>Install</h2>
+  <ol>
+    <li>Show your bookmarks bar (Chrome/Edge: <code>Ctrl+Shift+B</code>, Firefox: <code>Ctrl+B</code>, Safari: <code>⌘+Shift+B</code>)</li>
+    <li>Drag the orange button below to your bookmarks bar</li>
+  </ol>
+
+  <div class="install-box">
+    <a class="bm" href="javascript:(function(){var s=window.getSelection().toString().trim();var t=s||((document.body.innerText||document.body.textContent||'').trim());if(!t){alert('Track Finder: nothing to scrape.');return;}var n=document.title.trim();var u='https://track-finder.vercel.app/?'+new URLSearchParams({tracks:t,name:n,go:'1'}).toString();if(u.length>7500){alert('Track Finder: selection too large ('+t.length+' chars). Highlight a smaller section.');return;}window.open(u,'_blank');})();" onclick="alert('Drag me to your bookmarks bar instead of clicking. On mobile, long-press and add to bookmarks.');return false;">Find Tracks</a>
+    <div class="install-hint">Drag the button up to your bookmarks bar. Don't click it here.</div>
+  </div>
+
+  <h2>Use it</h2>
+  <ol>
+    <li>Open a tracklist page (1001tracklists, MixesDB, a SoundCloud set description, a Reddit thread, wherever)</li>
+    <li>Highlight the tracks with your cursor (skip the page headers, comments, ads)</li>
+    <li>Click the <b>Find Tracks</b> bookmark</li>
+    <li>Track Finder opens in a new tab with your tracks parsed and the first platform's search links ready</li>
+  </ol>
+
+  <div class="note">
+    <b>Tip:</b> The better your selection, the cleaner the output. If you don't select anything, the bookmarklet grabs the whole page text — which works but pulls in navigation and ads that the parser has to filter. Selection-first is faster.
+  </div>
+
+  <h2>1001tracklists specifically</h2>
+  <p>Cloudflare Turnstile blocks server-side scraping, so this bookmarklet is the cleanest path. Since it runs inside your already-verified browser tab, it sees the tracks the site actually rendered. Two recommended flows:</p>
+  <ul>
+    <li><b>Select the tracklist section</b> (drag from the first track to the last), then click Find Tracks</li>
+    <li>Or use 1001tracklists' <b>Export Tracklist</b> button, select the exported text, click Find Tracks</li>
+  </ul>
+
+  <h2>Mobile</h2>
+  <p>iOS Safari and Android Chrome both support bookmarklets, just with extra steps:</p>
+  <ul>
+    <li><b>iOS Safari:</b> bookmark any page, edit the bookmark, replace the URL with the bookmarklet code (shown below), save. Then tap it from any page.</li>
+    <li><b>Android Chrome:</b> same pattern — bookmark a page, edit, paste the code as the URL.</li>
+  </ul>
+
+  <details>
+    <summary>View the bookmarklet source</summary>
+<pre>javascript:(function(){
+  var s=window.getSelection().toString().trim();
+  var t=s||((document.body.innerText||document.body.textContent||'').trim());
+  if(!t){alert('Track Finder: nothing to scrape.');return;}
+  var n=document.title.trim();
+  var u='https://track-finder.vercel.app/?'+new URLSearchParams({tracks:t,name:n,go:'1'}).toString();
+  if(u.length>7500){alert('Track Finder: selection too large ('+t.length+' chars). Highlight a smaller section.');return;}
+  window.open(u,'_blank');
+})();</pre>
+  </details>
+
+  <footer>
+    <a href="https://github.com/conorbronsdon/track-finder">GitHub</a> · <a href="https://github.com/conorbronsdon/track-finder/issues">Suggest improvements</a> · Built by <a href="https://github.com/conorbronsdon">Conor Bronsdon</a>
+  </footer>
+</main>
+</body>
+</html>

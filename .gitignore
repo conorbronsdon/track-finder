@@ -1,6 +1,7 @@
 playlist_results.json
 *.html
 !index.html
+!bookmarklet.html
 __pycache__/
 .soundcloud-playwright-profile/
 .vercel
