@@ -158,7 +158,7 @@ Sub Focus - Original Don
   <div id="saved-list"></div>
 
   <details class="format-help">
-    <summary>Formatting &amp; how it works</summary>
+    <summary>Formatting &amp; how it works (FAQ)</summary>
     <div class="format-hint">
       <p><b>Paste a tracklist:</b> one track per line.</p>
       <ul>
@@ -167,12 +167,14 @@ Sub Focus - Original Don
         <li>Lines without a separator search as a single phrase</li>
       </ul>
       <p><b>YouTube playlist import:</b> paste a playlist URL into the dedicated field above and click <b>Import</b>. We fetch the video titles, strip common noise (<code>[Official Video]</code>, <code>[Lyrics]</code>, <code>[Free DL]</code>, <code>【...】</code>), and run them through the parser. (A URL dropped directly into the tracklist box also works as a fallback.)</p>
-      <p><b>From 1001tracklists:</b> use the <b>Export Tracklist</b> button for cleanest results. Raw select-all also works — the parser strips:</p>
+      <p><b>Bookmarklet — scrape any page's tracklist:</b> install the <a href="/bookmarklet.html">Track Finder bookmarklet</a> once, then on any page (1001tracklists, MixesDB, SoundCloud descriptions, Reddit threads) highlight the tracklist and click the bookmark. Track Finder opens in a new tab with the tracks parsed. This is the recommended path for 1001tracklists — Cloudflare Turnstile blocks server-side scraping, but the bookmarklet runs inside your already-verified tab.</p>
+      <p><b>From 1001tracklists (alternative to the bookmarklet):</b> use the <b>Export Tracklist</b> button on the 1001TL page for cleanest results and paste into the textarea. Raw select-all also works — the parser strips:</p>
       <ul>
         <li>UI noise: <code>Save</code> / <code>Pre-Save</code> buttons, play counts, track numbers, <code>artwork placeholder</code>, <code>[ID]</code> placeholders, repeated uploader usernames</li>
         <li>Metadata: leading timestamps, bare <code>05:10</code>-style timecodes on their own line, <code>w/</code> overlay markers, trailing <code>[Label]</code> tags, trailing <code>Artwork</code> alt-text</li>
         <li>Section headers: lines ending in <code>:</code> with nothing after (<code>Hot Right Now:</code>, <code>Killer Cut:</code>, <code>played:</code>, <code>Club Toolroom:</code>)</li>
       </ul>
+      <p><b>Found a bug or a tracklist that doesn't parse?</b> <a href="https://github.com/conorbronsdon/track-finder/issues/new" target="_blank" rel="noopener">Report it on GitHub</a> — paste a few lines of what you tried and what came out. Feature requests welcome too.</p>
     </div>
   </details>
 
