@@ -18,8 +18,8 @@
      for bright platforms like Beatport). */
   :root {
     --accent: #ff5500;
-    --accent-hover: #e04500;
-    --accent-text: #ffffff;
+    --accent-hover: #d64600;
+    --accent-text: #000000;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111; color: #eee; min-height: 100vh; }
@@ -146,8 +146,8 @@
   <div class="platform-select">
     <span class="label">Search on:</span>
     <div class="platform-chips">
-      <button type="button" class="chip" data-platform="soundcloud" style="--chip-color:#ff5500;--chip-text:#fff;">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.25 13a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 1 0v-4a.5.5 0 0 0-.5-.5zm2.25-1.5a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 1 0v-5a.5.5 0 0 0-.5-.5zm2.25-1.5a.5.5 0 0 0-.5.5v6.5a.5.5 0 0 0 1 0V10.5a.5.5 0 0 0-.5-.5zm2.25-1a.5.5 0 0 0-.5.5V17.5a.5.5 0 0 0 1 0V9.5a.5.5 0 0 0-.5-.5zm2.5-1a.5.5 0 0 0-.5.5V17.5a.5.5 0 0 0 .5.5h8a4 4 0 0 0 1.13-7.83 5 5 0 0 0-9.13-2.67Z"/></svg>
+      <button type="button" class="chip" data-platform="soundcloud" style="--chip-color:#ff5500;--chip-text:#000;">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 14h.8v4H1zm1.5-1.5h.8v5.5h-.8zm1.5-1.5h.8v7h-.8zm1.5-1h.8v8h-.8zm1.5-1h.8v9h-.8zm1.5-.5h.8v9.5h-.8zm1.5-1h.8v10.5h-.8zm1.5.5h.8v10h-.8zm2.5 1v9h8.5a3.5 3.5 0 0 0 0-7c-.08 0-.16 0-.24.01A4 4 0 0 0 11 9z"/></svg>
         SoundCloud
       </button>
       <button type="button" class="chip" data-platform="spotify" style="--chip-color:#1db954;--chip-text:#fff;">
@@ -159,7 +159,7 @@
         YouTube
       </button>
       <button type="button" class="chip" data-platform="apple" style="--chip-color:#fa243c;--chip-text:#fff;">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.997 6.124c0-.738-.065-1.47-.24-2.19-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 0 0-1.877-.726 10.496 10.496 0 0 0-1.564-.15c-.04-.003-.083-.01-.124-.013H5.988c-.152.01-.303.017-.455.026-.747.043-1.49.123-2.193.4-1.336.53-2.318 1.468-2.795 2.85-.182.525-.276 1.074-.356 1.626-.015.098-.025.196-.037.294v12.01c.004.03.013.06.015.09.085.781.232 1.54.67 2.229 1.023 1.646 2.67 2.447 4.5 2.653 1.72.195 3.49.146 5.24.146 4.123 0 8.244 0 12.366-.007.572 0 1.145-.058 1.707-.19 1.527-.36 2.77-1.268 3.56-2.72.476-.878.666-1.86.666-2.868 0-3.77-.01-7.54.002-11.31zM13.01 17.144c-.15.763-.672 1.256-1.382 1.513a3.28 3.28 0 0 1-.936.214c-.895.066-1.607-.502-1.812-1.328-.16-.637-.15-1.27.288-1.803.363-.44.878-.69 1.438-.8.576-.11 1.154-.177 1.728-.272.1-.017.192-.045.303-.07v-6.01c-.145.032-.27.058-.395.087-1.73.4-3.46.8-5.19 1.198-.417.097-.76.246-1.012.587-.233.315-.32.67-.32 1.05 0 2.76.002 5.52.002 8.28 0 .138-.013.28-.047.414-.166.67-.615 1.123-1.26 1.37-.29.108-.59.19-.898.22-.89.085-1.602-.478-1.823-1.323-.14-.537-.14-1.078.075-1.61.23-.568.67-.9 1.22-1.06.58-.17 1.16-.31 1.75-.45.24-.055.49-.095.72-.17.42-.14.66-.43.76-.85.07-.29.11-.59.11-.88V8.22c0-.15.015-.3.045-.44.1-.47.435-.81.925-.93l9.66-2.23c.085-.02.17-.04.26-.045.36-.02.67.235.7.595.006.09.004.17.004.26v10.56c0 .38-.022.745-.117 1.115z"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v11.55a3 3 0 1 0 2 2.83V7.06l9-1.56v8.05a3 3 0 1 0 2 2.83V2.5z"/></svg>
         Apple Music
       </button>
       <button type="button" class="chip" data-platform="beatport" style="--chip-color:#a8ff00;--chip-text:#000;">
@@ -313,7 +313,7 @@ function storageKey(name) {
 // Platform registry: search URL, brand accent color, foreground-on-accent,
 // and a darker hover variant. Kept parallel with the per-chip inline styles.
 const PLATFORMS = {
-  soundcloud: { name: "SoundCloud",  accent: "#ff5500", accentText: "#ffffff", accentHover: "#d64600", search: q => "https://soundcloud.com/search/sounds?q=" + q },
+  soundcloud: { name: "SoundCloud",  accent: "#ff5500", accentText: "#000000", accentHover: "#d64600", search: q => "https://soundcloud.com/search/sounds?q=" + q },
   spotify:    { name: "Spotify",     accent: "#1db954", accentText: "#ffffff", accentHover: "#169c46", search: q => "https://open.spotify.com/search/" + q },
   youtube:    { name: "YouTube",     accent: "#ff0000", accentText: "#ffffff", accentHover: "#cc0000", search: q => "https://www.youtube.com/results?search_query=" + q },
   apple:      { name: "Apple Music", accent: "#fa243c", accentText: "#ffffff", accentHover: "#d01d30", search: q => "https://music.apple.com/us/search?term=" + q },
