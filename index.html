@@ -110,8 +110,13 @@
   .saved-item:hover { background: #222; }
   .saved-item .name { color: #eee; font-weight: 500; }
   .saved-item .count { color: #666; font-size: 13px; }
-  .saved-item .delete-saved { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .saved-item .edit-saved, .saved-item .delete-saved { background: none; border: none; color: #555; cursor: pointer; padding: 2px 6px; display: inline-flex; align-items: center; transition: color 0.15s ease; }
+  .saved-item .edit-saved { margin-left: 4px; }
+  .saved-item .edit-saved:hover { color: var(--accent); }
+  .saved-item .delete-saved { font-size: 16px; }
   .saved-item .delete-saved:hover { color: #f55; }
+  .saved-item .rename-input { flex: 1; padding: 4px 8px; background: #0d0d0d; color: #eee; border: 1px solid var(--accent); border-radius: 4px; font-size: 13px; font-family: inherit; }
+  .saved-item .rename-input:focus { outline: none; }
 
   /* Footer */
   .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #222; color: #666; font-size: 12px; line-height: 1.6; }
@@ -366,6 +371,31 @@ function removePlaylistIndex(name) {
   localStorage.removeItem(storageKey(name) + "-tracks");
 }
 
+function renamePlaylist(oldName, newName) {
+  newName = (newName || "").trim();
+  if (!newName || newName === oldName) return false;
+  const playlists = getSavedPlaylists();
+  if (playlists.some(p => p.name === newName)) {
+    alert("A playlist named \"" + newName + "\" already exists.");
+    return false;
+  }
+  // Migrate the two per-playlist storage slots
+  const tracks = localStorage.getItem(storageKey(oldName) + "-tracks");
+  const saved = localStorage.getItem(storageKey(oldName));
+  if (tracks !== null) {
+    localStorage.setItem(storageKey(newName) + "-tracks", tracks);
+    localStorage.removeItem(storageKey(oldName) + "-tracks");
+  }
+  if (saved !== null) {
+    localStorage.setItem(storageKey(newName), saved);
+    localStorage.removeItem(storageKey(oldName));
+  }
+  // Swap the index entry in place so ordering is preserved
+  const updated = playlists.map(p => p.name === oldName ? { name: newName, count: p.count } : p);
+  localStorage.setItem("sc-finder-index", JSON.stringify(updated));
+  return true;
+}
+
 function renderSavedPlaylists() {
   const container = document.getElementById("saved-list");
   container.textContent = "";
@@ -389,6 +419,12 @@ function renderSavedPlaylists() {
     countSpan.className = "count";
     countSpan.textContent = p.count + " tracks";
 
+    const editBtn = document.createElement("button");
+    editBtn.className = "edit-saved";
+    editBtn.title = "Rename";
+    editBtn.setAttribute("aria-label", "Rename playlist");
+    editBtn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zm17.71-10.21a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+
     const delBtn = document.createElement("button");
     delBtn.className = "delete-saved";
     delBtn.dataset.name = p.name;
@@ -397,16 +433,52 @@ function renderSavedPlaylists() {
 
     item.appendChild(nameSpan);
     item.appendChild(countSpan);
+    item.appendChild(editBtn);
     item.appendChild(delBtn);
     container.appendChild(item);
 
+    function startRename() {
+      const oldName = item.dataset.name;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "rename-input";
+      input.value = oldName;
+      input.setAttribute("aria-label", "Rename playlist");
+      nameSpan.replaceWith(input);
+      input.focus();
+      input.select();
+      let committed = false;
+      const commit = (save) => {
+        if (committed) return;
+        committed = true;
+        if (save && renamePlaylist(oldName, input.value)) {
+          renderSavedPlaylists();
+        } else {
+          // Restore unchanged
+          input.replaceWith(nameSpan);
+        }
+      };
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); commit(true); }
+        else if (e.key === "Escape") { e.preventDefault(); commit(false); }
+      });
+      input.addEventListener("blur", () => commit(true));
+    }
+
     item.addEventListener("click", (e) => {
-      if (e.target.classList.contains("delete-saved")) {
+      if (e.target.closest(".delete-saved")) {
         e.stopPropagation();
-        removePlaylistIndex(e.target.dataset.name);
+        removePlaylistIndex(item.dataset.name);
         renderSavedPlaylists();
         return;
       }
+      if (e.target.closest(".edit-saved")) {
+        e.stopPropagation();
+        startRename();
+        return;
+      }
+      // Clicking the input shouldn't trigger a load
+      if (e.target.classList.contains("rename-input")) return;
       const name = item.dataset.name;
       const tracks = JSON.parse(localStorage.getItem(storageKey(name) + "-tracks") || "[]");
       if (tracks.length) showResults(tracks, name);
