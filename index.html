@@ -81,9 +81,12 @@
   #results-view { display: none; padding: 20px; }
   .header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
   .header h1 { color: var(--accent); font-size: 24px; transition: color 0.25s ease; }
-  #back-btn, #batch-btn { padding: 6px 14px; background: #333; color: #aaa; border: 1px solid #444; border-radius: 4px; cursor: pointer; font-size: 13px; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
-  #back-btn:hover, #batch-btn:hover { background: #444; color: #eee; }
-  #batch-btn { margin-left: auto; background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  #back-btn, #batch-btn, #share-btn { padding: 6px 14px; background: #333; color: #aaa; border: 1px solid #444; border-radius: 4px; cursor: pointer; font-size: 13px; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+  #back-btn:hover, #batch-btn:hover, #share-btn:hover { background: #444; color: #eee; }
+  #share-btn { margin-left: auto; }
+  #share-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #share-btn.copied { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  #batch-btn { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
   #batch-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--accent-text); }
   .track { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #222; transition: background 0.15s; }
   .track:hover { background: #1a1a1a; }
@@ -224,6 +227,7 @@ Sub Focus - Original Don
   <div class="header">
     <button id="back-btn">&larr; Back</button>
     <h1 id="results-title">Playlist</h1>
+    <button id="share-btn" title="Copy a shareable URL of this tracklist">Share</button>
     <button id="batch-btn">Open next 10</button>
   </div>
   <div class="progress">Progress: <span id="count">0</span> / <span id="total">0</span> done</div>
@@ -641,6 +645,41 @@ document.getElementById("go-btn").addEventListener("click", () => {
   if (!tracks.length) { alert("No tracks found. Check format."); return; }
   showResults(tracks, nameInput.value.trim() || "Playlist");
 });
+
+// Share button — build a URL with current tracks + platform + name, copy it.
+function buildShareURL() {
+  const url = new URL(window.location.origin + "/");
+  const lines = currentTracks.map(([a, t]) => {
+    if (a && t) return a + " - " + t;
+    return a || t || "";
+  }).filter(Boolean);
+  url.searchParams.set("tracks", lines.join("\n"));
+  url.searchParams.set("platform", currentPlatform);
+  const name = document.getElementById("results-title").textContent;
+  if (name && name !== "Playlist") url.searchParams.set("name", name);
+  url.searchParams.set("go", "1");
+  return url.toString();
+}
+
+async function copyShareURL() {
+  const btn = document.getElementById("share-btn");
+  const shareURL = buildShareURL();
+  if (shareURL.length > 7500) {
+    alert("This playlist is too large to share as a URL (" + shareURL.length + " chars). Send the tracklist text directly or open fewer tracks.");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(shareURL);
+    btn.textContent = "Copied!";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Share"; btn.classList.remove("copied"); }, 1600);
+  } catch {
+    // Fallback for browsers without clipboard API or insecure contexts
+    window.prompt("Copy this URL:", shareURL);
+  }
+}
+
+document.getElementById("share-btn").addEventListener("click", copyShareURL);
 
 // Back button
 document.getElementById("back-btn").addEventListener("click", () => {
