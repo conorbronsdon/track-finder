@@ -12,7 +12,7 @@ Open an [issue](https://github.com/conorbronsdon/track-finder/issues) with your 
 | [#2](https://github.com/conorbronsdon/track-finder/issues/2) | Import tracklist from 1001tracklists URL | Investigating |
 | [#3](https://github.com/conorbronsdon/track-finder/issues/3) | Import tracklist from MixesDB URL | Deferred to after #2 |
 | [#4](https://github.com/conorbronsdon/track-finder/issues/4) | Create actual playlists on destination platforms (playlistify-style) | Parked — needs OAuth + backend |
-| [#5](https://github.com/conorbronsdon/track-finder/issues/5) | Additional search platforms (Tidal, Bandcamp, Mixcloud, Deezer) | Wait for user demand |
+| [#5](https://github.com/conorbronsdon/track-finder/issues/5) | Additional search platforms (Tidal, Bandcamp, Mixcloud, Deezer) | Shipped in PR #8 |
 
 ## Context on the bigger ones
 
