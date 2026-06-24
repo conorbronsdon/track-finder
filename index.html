@@ -673,9 +673,14 @@ document.getElementById("batch-btn").addEventListener("click", () => {
   }
   if (!undone.length) { alert("All tracks are done!"); return; }
 
+  let blocked = false;
   for (const i of undone) {
     const [artist, title] = currentTracks[i];
-    window.open(searchUrl(artist, title), "_blank");
+    const win = window.open(searchUrl(artist, title), "_blank");
+    // Browsers permit only the first window.open() per click unless pop-ups are
+    // allowed for the site. A null/undefined handle means the tab was blocked —
+    // stop here and don't mark tracks done that never actually opened.
+    if (!win) { blocked = true; break; }
     if (!currentSaved[i]) {
       currentSaved[i] = true;
       const doneBtn = document.querySelector(`.done-btn[data-i="${i}"]`);
@@ -692,6 +697,9 @@ document.getElementById("batch-btn").addEventListener("click", () => {
   const batchBtn = document.getElementById("batch-btn");
   if (remaining <= 0) { batchBtn.textContent = "All done!"; batchBtn.disabled = true; }
   else { batchBtn.textContent = "Open next " + Math.min(remaining, 10); batchBtn.disabled = false; }
+  if (blocked) {
+    alert("Your browser blocked the extra tabs. Allow pop-ups for this site, then click “Open next” again to open the rest.");
+  }
 });
 
 // Detect a single-line YouTube playlist URL (kept as a silent fallback if a
