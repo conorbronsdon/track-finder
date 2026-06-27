@@ -8,21 +8,21 @@ Open an [issue](https://github.com/conorbronsdon/track-finder/issues) with your 
 
 | # | Idea | Status |
 |---|------|--------|
-| [#1](https://github.com/conorbronsdon/track-finder/issues/1) | Import tracklist from YouTube playlist URL | Planned |
-| [#2](https://github.com/conorbronsdon/track-finder/issues/2) | Import tracklist from 1001tracklists URL | Investigating |
-| [#3](https://github.com/conorbronsdon/track-finder/issues/3) | Import tracklist from MixesDB URL | Deferred to after #2 |
-| [#4](https://github.com/conorbronsdon/track-finder/issues/4) | Create actual playlists on destination platforms (playlistify-style) | Parked — needs OAuth + backend |
+| [#1](https://github.com/conorbronsdon/track-finder/issues/1) | Import tracklist from YouTube playlist URL | Shipped (`api/import/youtube.js`) |
+| [#2](https://github.com/conorbronsdon/track-finder/issues/2) | Import tracklist from 1001tracklists URL | Closed — bookmarklet covers it |
+| [#3](https://github.com/conorbronsdon/track-finder/issues/3) | Import tracklist from MixesDB URL | Closed — bookmarklet covers it |
+| [#4](https://github.com/conorbronsdon/track-finder/issues/4) | Create actual playlists on destination platforms (playlistify-style) | Spotify MVP shipped; open for more platforms |
 | [#5](https://github.com/conorbronsdon/track-finder/issues/5) | Additional search platforms (Tidal, Bandcamp, Mixcloud, Deezer) | Shipped in PR #8 |
 
 ## Context on the bigger ones
 
-### 1001tracklists import (#2) — why it's harder than it looks
-1001tracklists is now fully client-side rendered. A plain server fetch returns a page shell with "Please enable JavaScript for full functionality" and no track data. Existing open-source scrapers (e.g., [elte0/1001-tracklists-api](https://github.com/elte0/1001-tracklists-api)) target the older server-rendered layout and no longer work. Three real paths: headless browser (heavy), reverse-engineered JSON endpoint (lightest if it exists), bookmarklet/extension (most durable, different distribution model). Issue #2 has the full breakdown.
+### 1001tracklists / MixesDB import (#2, #3) — how they got resolved
+1001tracklists is now fully client-side rendered. A plain server fetch returns a page shell with "Please enable JavaScript for full functionality" and no track data. Existing open-source scrapers (e.g., [elte0/1001-tracklists-api](https://github.com/elte0/1001-tracklists-api)) target the older server-rendered layout and no longer work. Three real paths were on the table: headless browser (heavy), reverse-engineered JSON endpoint (lightest if it exists), bookmarklet/extension (most durable).
 
-**Interim:** copy-paste flow. Parser handles 1001TL-specific artifacts (timestamps, `w/` overlays, `[ID]` lines, `[Label]` tags). See `parseTracklist` in `index.html`.
+**Resolution:** the bookmarklet won. Rather than build and maintain a per-site server fetcher for each source, `bookmarklet.html` scrapes the tracklist from *any* page (1001tracklists, MixesDB, SoundCloud descriptions, Reddit) in the user's already-authenticated tab and hands it to Track Finder — sidestepping the anti-bot problem entirely. The 1001TL-aware parser cleanup (timestamps, `w/` overlays, `[ID]` lines, `[Label]` tags) backs up the copy-paste flow. See `parseTracklist` in `index.html`. Both #2 and #3 closed against this single durable approach.
 
-### Playlist creation (#4) — why it's a different product
-Current app returns search links; user clicks through to add tracks manually. Writing playlists directly requires OAuth per platform, token management, user session state, encrypted token storage, and track-matching logic. That's a backend product, not an extension of Track Finder. Likely wants its own repo.
+### Playlist creation (#4) — Spotify MVP shipped client-side
+Originally scoped as a separate backend product (OAuth per platform, token storage, session state). Spotify turned out not to need a backend: the "Create in Spotify" button runs the full Authorization Code + PKCE flow client-side (no client secret, token held in-memory only and never persisted), creates a private playlist, matches each track via the search API, and reports unmatched tracks back. See the `spotify*` functions in `index.html`. Live use still needs the owner to set a real `SPOTIFY_CLIENT_ID` (currently a placeholder). The issue stays open for the harder platforms — Apple Music, YouTube Music (no public write API) — which are still a different-product problem.
 
 ## Parked without an issue
 
