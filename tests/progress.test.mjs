@@ -7,7 +7,8 @@ const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const src = html.match(/function carryProgress\([\s\S]*?\n}\n/);
 assert.ok(src, "carryProgress() not found in index.html");
 const carryProgress = new Function(src[0] + "; return carryProgress;")();
-// Guard against the extraction silently loading a truncated or wrong body.
+// Fail fast if the regex extraction didn't yield the 3-argument function.
+// (The must-fire cases below are what catch a wrong body.)
 assert.equal(typeof carryProgress, "function", "extracted carryProgress is not a function");
 assert.equal(carryProgress.length, 3, "extracted carryProgress has the wrong arity");
 
@@ -39,10 +40,21 @@ test("same list keeps saved progress unchanged", () => {
   assert.deepEqual(out, { 0: true, 3: true });
 });
 
-// No stored tracklist (older saves, or a name never generated before): there is
-// nothing to compare against, so existing marks are kept exactly as stored.
-test("no stored tracklist keeps non-empty saved marks exactly", () => {
-  assert.deepEqual(carryProgress(null, { 1: true, 4: true }, oldList), { 1: true, 4: true });
+// Must fire: with no stored tracklist (legacy data, a failed write) the marks
+// can't be tied to any track, so they must not land on the new list by index.
+test("no stored tracklist drops unverifiable marks", () => {
+  assert.deepEqual(carryProgress(null, { 1: true, 4: true }, oldList), {});
+});
+
+// Must fire: a non-array value under the tracks key (the X / X-tracks name
+// collision stores a progress object there) is treated as no tracklist.
+test("non-array stored tracklist drops unverifiable marks", () => {
+  assert.deepEqual(carryProgress({ 0: true }, { 0: true, 1: true }, oldList), {});
+});
+
+// Must not fire: a first-ever generate with nothing stored starts empty.
+test("first generate with nothing stored starts empty", () => {
+  assert.deepEqual(carryProgress(null, {}, oldList), {});
 });
 
 if (failed) { console.log(`\n${failed} test(s) failed`); process.exit(1); }

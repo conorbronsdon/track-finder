@@ -557,9 +557,13 @@ let currentKey = "";
 // Progress is stored by row index under the playlist name. When a name is
 // regenerated with a different tracklist (e.g. the default "Playlist"), carry
 // "done" marks over by track instead of by index, so stale marks from the old
-// list don't land on unrelated tracks in the new one.
+// list don't land on unrelated tracks in the new one. With no stored tracklist
+// (legacy data, a failed write, or a name collision) the marks can't be tied
+// to any track, so they are dropped. Reopening a saved playlist always has a
+// stored tracklist, so it keeps its progress.
 function carryProgress(prevTracks, saved, tracks) {
-  if (!prevTracks || JSON.stringify(prevTracks) === JSON.stringify(tracks)) return saved;
+  if (!Array.isArray(prevTracks)) return {};
+  if (JSON.stringify(prevTracks) === JSON.stringify(tracks)) return saved;
   const done = new Set(Object.keys(saved).filter(i => prevTracks[i]).map(i => JSON.stringify(prevTracks[i])));
   const out = {};
   tracks.forEach((t, i) => { if (done.has(JSON.stringify(t))) out[i] = true; });
