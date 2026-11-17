@@ -109,6 +109,14 @@ https://track-finder.vercel.app/?tracks=Kanine%20-%20Feel%20The%20Vibration%0ASu
 
 All params are optional. Use any combination. The user can still edit the textarea before generating unless `go=1` is set.
 
+## Tests
+
+Zero-dependency, needs only Node 18+:
+
+```bash
+node tests/progress.test.mjs
+```
+
 ## Contributing
 
 Open an [issue](https://github.com/conorbronsdon/track-finder/issues) with a format the parser doesn't handle, a bug, or a feature idea. PRs welcome.

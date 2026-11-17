@@ -554,6 +554,18 @@ let currentTracks = [];
 let currentSaved = {};
 let currentKey = "";
 
+// Progress is stored by row index under the playlist name. When a name is
+// regenerated with a different tracklist (e.g. the default "Playlist"), carry
+// "done" marks over by track instead of by index, so stale marks from the old
+// list don't land on unrelated tracks in the new one.
+function carryProgress(prevTracks, saved, tracks) {
+  if (!prevTracks || JSON.stringify(prevTracks) === JSON.stringify(tracks)) return saved;
+  const done = new Set(Object.keys(saved).filter(i => prevTracks[i]).map(i => JSON.stringify(prevTracks[i])));
+  const out = {};
+  tracks.forEach((t, i) => { if (done.has(JSON.stringify(t))) out[i] = true; });
+  return out;
+}
+
 function showResults(tracks, name) {
   document.getElementById("input-view").style.display = "none";
   document.getElementById("results-view").style.display = "block";
@@ -570,7 +582,9 @@ function showResults(tracks, name) {
 
   const key = storageKey(name);
   currentKey = key;
-  const saved = JSON.parse(localStorage.getItem(key) || "{}");
+  const prevTracks = JSON.parse(localStorage.getItem(key + "-tracks") || "null");
+  const saved = carryProgress(prevTracks, JSON.parse(localStorage.getItem(key) || "{}"), tracks);
+  localStorage.setItem(key, JSON.stringify(saved));
   currentSaved = saved;
   let doneCount = 0;
 
