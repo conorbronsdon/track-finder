@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-const src = html.match(/function carryProgress\([\s\S]*?\n}\n/);
+const src = html.match(/function carryProgress\([\s\S]*?\r?\n}\r?\n/);
 assert.ok(src, "carryProgress() not found in index.html");
 const carryProgress = new Function(src[0] + "; return carryProgress;")();
 // Fail fast if the regex extraction didn't yield the 3-argument function.
