@@ -7,6 +7,9 @@ const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const src = html.match(/function carryProgress\([\s\S]*?\n}\n/);
 assert.ok(src, "carryProgress() not found in index.html");
 const carryProgress = new Function(src[0] + "; return carryProgress;")();
+// Guard against the extraction silently loading a truncated or wrong body.
+assert.equal(typeof carryProgress, "function", "extracted carryProgress is not a function");
+assert.equal(carryProgress.length, 3, "extracted carryProgress has the wrong arity");
 
 let failed = 0;
 function test(name, fn) {
@@ -36,8 +39,10 @@ test("same list keeps saved progress unchanged", () => {
   assert.deepEqual(out, { 0: true, 3: true });
 });
 
-test("first generate (nothing stored) keeps saved as-is", () => {
-  assert.deepEqual(carryProgress(null, {}, oldList), {});
+// No stored tracklist (older saves, or a name never generated before): there is
+// nothing to compare against, so existing marks are kept exactly as stored.
+test("no stored tracklist keeps non-empty saved marks exactly", () => {
+  assert.deepEqual(carryProgress(null, { 1: true, 4: true }, oldList), { 1: true, 4: true });
 });
 
 if (failed) { console.log(`\n${failed} test(s) failed`); process.exit(1); }
